@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 
 #
@@ -22,11 +23,11 @@ class ITMParser:
         ITM_TS_Packet = 0x80  # TODO - The TRM shows 0xC0, check this out when we have timestamps emitted
 
     def __init__(self):
-        self._state = Protocol_State.ITM_IDLE
-        self._rx_packet = bytearray(8)
-        self._zero_count = 0
-        self._current_count = 0
-        self._target_count = 0
+        self._state: Protocol_State = Protocol_State.ITM_IDLE
+        self._rx_packet: bytearray = bytearray(8)
+        self._zero_count: int = 0
+        self._current_count: int = 0
+        self._target_count: int = 0
         #
         # The ITM Protocol State Register
         #
@@ -34,7 +35,7 @@ class ITMParser:
         #
         # ITM Protocol State Names for Debug
         #
-        itm_state_names = ["ITM_IDLE", "ITM_SYNCING", "ITM_TS", "ITM_SWIT"]
+        itm_state_names: List[str] = ["ITM_IDLE", "ITM_SYNCING", "ITM_TS", "ITM_SWIT"]
 
     def parse(self, data_input: int):
         match self._state:
@@ -57,9 +58,8 @@ class ITMParser:
                         self._state = Protocol_State.ITM_TS
 
                 elif data_input & 0x0F == 0x04:  # Reserved Packet Type
-                    self._state = (
-                        Protocol_State.ITM_IDLE
-                    )  # Ignore this unknown/reserved packet
+                    # Ignore this unknown/reserved packet
+                    self._state = Protocol_State.ITM_IDLE
 
                 elif ~data_input & 0x04 == 0x04:  # SWIT Packet
                     self._target_count = data_input & 0x03
